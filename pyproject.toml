@@ -39,6 +39,7 @@ dependencies = [
     "dill",
     "word2number",
     "more_itertools",
+    “antlr4-python3-runtime”==4.11.0
 ]
 
 [tool.setuptools.packages.find]
