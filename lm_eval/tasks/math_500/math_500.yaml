@@ -1,0 +1,11 @@
+task: math_500
+dataset_path: json # the name of the dataset on the HF Hub.
+dataset_name: null
+dataset_kwargs:
+  data_files: /Users/sunjialiang/Desktop/eval/math-500/test.jsonl
+doc_to_text: !function utils_math500.doc_to_text
+doc_to_target: "{{answer}}"
+test_split: train
+metric_list:
+  - metric: pass@1
+    aggregation: mean

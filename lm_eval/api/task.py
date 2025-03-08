@@ -1526,11 +1526,13 @@ class ConfigurableTask(Task):
                 acc = 1.0 if pred in gold else 0.0
                 acc_norm = 1.0 if pred_norm in gold else 0.0
                 exact_match = int(any([is_greedy[i] if i != -100 else 0 for i in gold]))
+                pass1 = int(any([is_greedy[i] if i != -100 else 0 for i in gold]))
             else:
                 acc = 1.0 if pred == gold else 0.0
                 acc_norm = 1.0 if pred_norm == gold else 0.0
                 # TODO: this gets score of 0 on arc_challenge for pythia-70m. need to test that this works properly
                 exact_match = int(is_greedy[gold]) if gold != -100 else 0
+                pass1 = int(is_greedy[gold]) if gold != -100 else 0
 
             prob_norm = utils.softmax(lls)
 
@@ -1542,6 +1544,7 @@ class ConfigurableTask(Task):
                 **({"mcc": (gold, pred)} if "mcc" in use_metric else {}),
                 **({"acc_norm": acc_norm} if "acc_norm" in use_metric else {}),
                 **({"exact_match": exact_match} if "exact_match" in use_metric else {}),
+                **({"pass@1": pass1} if "pass@1" in use_metric else {}),
                 **(
                     {"brier_score": (gold, prob_norm)}
                     if "brier_score" in use_metric
@@ -1584,7 +1587,7 @@ class ConfigurableTask(Task):
                         # sometimes, a multiple_target dataset has exceptions where one doc has only one string answer
                         # print(gold)
                         gold = [gold]
-                    if metric == "exact_match":
+                    if metric == "exact_match" or metric == "pass@1":
                         result = [result for _ in range(len(gold))]
                         scores = self._metric_fn_list[metric](
                             references=gold,

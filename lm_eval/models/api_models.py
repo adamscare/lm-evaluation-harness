@@ -209,7 +209,9 @@ class TemplateAPI(TemplateLM):
                 messages = self.decode_batch(messages)
             if self._batch_size <= 1:
                 # if batch is 1 return str
-                return messages[0]
+                mes = list()
+                mes.append({'role': 'user', 'content': messages[0]})
+                return mes
             else:
                 # list[str,...]
                 return messages
@@ -360,16 +362,20 @@ class TemplateAPI(TemplateLM):
         # !!! Copy: shared dict for each request, need new object !!!
         gen_kwargs = copy.deepcopy(gen_kwargs)
         try:
-            response = requests.post(
-                self.base_url,
-                json=self._create_payload(
+            payload_json=self._create_payload(
                     self.create_message(messages),
                     generate=generate,
                     gen_kwargs=gen_kwargs,
                     seed=self._seed,
-                    eos=self.eos_string,
                     **kwargs,
-                ),
+                )
+            payload_json.pop('stop')
+            payload_json.pop('seed')
+            payload_json.pop('max_tokens')
+            print(payload_json)
+            response = requests.post(
+                self.base_url,
+                json=payload_json,
                 headers=self.header,
                 verify=self.verify_certificate,
             )

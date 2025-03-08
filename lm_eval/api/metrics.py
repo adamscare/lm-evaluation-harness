@@ -221,9 +221,38 @@ def exact_match_hf_evaluate(
 
     return {"exact_match": np.mean(score_list)}
 
-
+def pass1_evaluate(predictions,references):
+    print(predictions)
+    print(references)
+    pattern = r"\\boxed{((?:[^{}]|\{[^{}]*\})*)}"  # 精确匹配boxed内容
+    predictions = re.findall(pattern, predictions[0])
+    if(len(predictions)==0):
+        return {"pass@1": 0.0}
+    from sympy.parsing.latex import parse_latex
+    if predictions[-1].replace(" ", "") == references[0].replace(" ", ""):
+        return {"pass@1": 1.0}
+    else:
+        try:
+            expr1 = parse_latex(predictions[-1].replace(" ", ""))
+            expr2 = parse_latex(references[0].replace(" ", ""))
+            if(expr1==expr2):
+                return {"pass@1": 1.0}
+            else:
+                return {"pass@1": 0.0}
+        except Exception:
+            print("出错返回0")
+            return {"pass@1": 0.0}
+  
+        
 ###
-
+@register_metric(
+    metric="pass@1",
+    higher_is_better=True,
+    output_type="generate_until",
+    aggregation="mean",
+)
+def pass1_fn(**kwargs):
+    return pass1_evaluate(**kwargs)
 
 @register_metric(
     metric="exact_match",
